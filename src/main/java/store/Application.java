@@ -2,7 +2,7 @@ package store;
 
 import camp.nextstep.edu.missionutils.Console;
 import java.util.List;
-import store.dto.Buy;
+import store.dto.Order;
 import store.service.Checkout;
 import store.service.Inventory;
 import store.view.InputView;
@@ -28,8 +28,8 @@ public class Application {
         while (true) {
             try {
                 String input = InputView.readItem();
-                List<Buy> buys = InputView.parseOrders(input);
-                checkout.processOrders(buys);
+                List<Order> orders = InputView.parseOrders(input);
+                checkout.processOrders(orders);
                 break;
             } catch (IllegalArgumentException e) {
                 System.out.println(e.getMessage());

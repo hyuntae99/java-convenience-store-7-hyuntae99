@@ -3,7 +3,7 @@ package store.dto;
 import java.util.List;
 import store.domain.Product;
 
-public class BuyResult {
+public class OrderResult {
     private int cost;
     private int freeQuantity;
     private int nonPromotionAmount;
@@ -12,7 +12,7 @@ public class BuyResult {
     private List<Product> modifiedProducts;
     private int processedQuantity;
 
-    public BuyResult(int cost, int freeQuantity, int nonPromotionAmount, List<Product> boughtProducts, List<Product> freeProducts, List<Product> modifiedProducts) {
+    public OrderResult(int cost, int freeQuantity, int nonPromotionAmount, List<Product> boughtProducts, List<Product> freeProducts, List<Product> modifiedProducts) {
         this.cost = cost;
         this.freeQuantity = freeQuantity;
         this.nonPromotionAmount = nonPromotionAmount;
@@ -22,7 +22,7 @@ public class BuyResult {
         this.processedQuantity = 0;
     }
 
-    public BuyResult(int cost, int freeQuantity, int nonPromotionAmount, List<Product> boughtProducts, List<Product> freeProducts, List<Product> modifiedProducts, int processedQuantity) {
+    public OrderResult(int cost, int freeQuantity, int nonPromotionAmount, List<Product> boughtProducts, List<Product> freeProducts, List<Product> modifiedProducts, int processedQuantity) {
         this(cost, freeQuantity, nonPromotionAmount, boughtProducts, freeProducts, modifiedProducts);
         this.processedQuantity = processedQuantity;
     }

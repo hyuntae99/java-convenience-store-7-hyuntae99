@@ -3,7 +3,7 @@ package store.view;
 import java.util.ArrayList;
 import java.util.List;
 import camp.nextstep.edu.missionutils.Console;
-import store.dto.Buy;
+import store.dto.Order;
 
 public class InputView {
 
@@ -20,8 +20,8 @@ public class InputView {
         }
     }
 
-    public static List<Buy> parseOrders(String input) {
-        List<Buy> buys = new ArrayList<>();
+    public static List<Order> parseOrders(String input) {
+        List<Order> orders = new ArrayList<>();
         String sanitizedInput = sanitizeInput(input);
         String[] items = sanitizedInput.split(",");
         for (String item : items) {
@@ -29,9 +29,9 @@ public class InputView {
             validateItemFormat(parts);
             String name = parts[0].trim();
             int quantity = parseQuantity(parts[1].trim());
-            buys.add(new Buy(name, quantity));
+            orders.add(new Order(name, quantity));
         }
-        return buys;
+        return orders;
     }
 
     private static String sanitizeInput(String input) {

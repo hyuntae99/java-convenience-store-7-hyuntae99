@@ -3,8 +3,8 @@ package store.service;
 import java.util.ArrayList;
 import java.util.List;
 import camp.nextstep.edu.missionutils.Console;
-import store.dto.Buy;
-import store.dto.BuyResult;
+import store.dto.Order;
+import store.dto.OrderResult;
 import store.domain.Product;
 import store.domain.Promotion;
 
@@ -21,7 +21,7 @@ public class Checkout {
         this.inventory = inventory;
     }
 
-    public void processOrders(List<Buy> buys) {
+    public void processOrders(List<Order> orders) {
         List<Product> tempBoughtProducts = new ArrayList<>();
         List<Product> tempFreeProducts = new ArrayList<>();
         int tempTotalAmount = 0;
@@ -29,23 +29,23 @@ public class Checkout {
         int tempNonPromotionAmount = 0;
         List<Product> modifiedProducts = new ArrayList<>();
 
-        for (Buy buy : buys) {
-            List<Product> productList = makeProductList(buy);
-            int buyQuantity = buy.getQuantity();
+        for (Order order : orders) {
+            List<Product> productList = makeProductList(order);
+            int buyQuantity = order.getQuantity();
             exceedQuantity(productList, buyQuantity);
 
-            BuyResult buyResult = processBuy(productList, buyQuantity);
-            if (buyResult == null) {
+            OrderResult orderResult = processBuy(productList, buyQuantity);
+            if (orderResult == null) {
                 restoreInventory(modifiedProducts);
                 return;
             }
 
-            tempTotalAmount += buyResult.getCost();
-            tempPromotionDiscount += buyResult.getFreeQuantity() * productList.get(0).getPrice();
-            tempNonPromotionAmount += buyResult.getNonPromotionAmount();
-            mergeProducts(tempBoughtProducts, buyResult.getBoughtProducts());
-            mergeProducts(tempFreeProducts, buyResult.getFreeProducts());
-            modifiedProducts.addAll(buyResult.getModifiedProducts());
+            tempTotalAmount += orderResult.getCost();
+            tempPromotionDiscount += orderResult.getFreeQuantity() * productList.get(0).getPrice();
+            tempNonPromotionAmount += orderResult.getNonPromotionAmount();
+            mergeProducts(tempBoughtProducts, orderResult.getBoughtProducts());
+            mergeProducts(tempFreeProducts, orderResult.getFreeProducts());
+            modifiedProducts.addAll(orderResult.getModifiedProducts());
         }
 
         membershipDiscount = calculateMembershipDiscount(tempNonPromotionAmount);
@@ -59,7 +59,7 @@ public class Checkout {
         printAllReceipt();
     }
 
-    private BuyResult processBuy(List<Product> productList, int buyQuantity) {
+    private OrderResult processBuy(List<Product> productList, int buyQuantity) {
         int remainingQuantity = buyQuantity;
         int cost = 0;
         int freeQuantity = 0;
@@ -71,7 +71,7 @@ public class Checkout {
         for (Product product : productList) {
             if (isPromotionApplicable(product) && remainingQuantity > 0) {
                 Promotion promotion = product.getPromotion();
-                BuyResult promotionResult = processPromotion(product, promotion, remainingQuantity);
+                OrderResult promotionResult = processPromotion(product, promotion, remainingQuantity);
                 remainingQuantity -= promotionResult.getProcessedQuantity();
                 cost += promotionResult.getCost();
                 freeQuantity += promotionResult.getFreeQuantity();
@@ -88,7 +88,7 @@ public class Checkout {
                 restoreInventory(modifiedProducts);
                 return null;
             } else {
-                BuyResult nonPromotionResult = processNonPromotion(productList, remainingQuantity);
+                OrderResult nonPromotionResult = processNonPromotion(productList, remainingQuantity);
                 cost += nonPromotionResult.getCost();
                 nonPromotionQuantity += nonPromotionResult.getNonPromotionAmount();
                 mergeProducts(boughtProducts, nonPromotionResult.getBoughtProducts());
@@ -96,14 +96,14 @@ public class Checkout {
             }
         }
 
-        return new BuyResult(cost, freeQuantity, nonPromotionQuantity, boughtProducts, freeProducts, modifiedProducts);
+        return new OrderResult(cost, freeQuantity, nonPromotionQuantity, boughtProducts, freeProducts, modifiedProducts);
     }
 
     private boolean isPromotionApplicable(Product product) {
         return product.getPromotion() != null && product.getPromotion().isActive() && product.getQuantity() > 0;
     }
 
-    private BuyResult processPromotion(Product product, Promotion promotion, int remainingQuantity) {
+    private OrderResult processPromotion(Product product, Promotion promotion, int remainingQuantity) {
         int processedQuantity = 0;
         int freeQuantity = 0;
         int cost = 0;
@@ -127,7 +127,7 @@ public class Checkout {
             addOrUpdateProduct(freeProducts, product.getName(), product.getPrice(), promotion.getGet());
         }
 
-        return new BuyResult(cost, freeQuantity, 0, boughtProducts, freeProducts, modifiedProducts, processedQuantity);
+        return new OrderResult(cost, freeQuantity, 0, boughtProducts, freeProducts, modifiedProducts, processedQuantity);
     }
 
     private boolean confirmPromotionGet(String productName, int promotionGet) {
@@ -142,7 +142,7 @@ public class Checkout {
         return input.equalsIgnoreCase("Y");
     }
 
-    private BuyResult processNonPromotion(List<Product> productList, int nonPromotionQuantity) {
+    private OrderResult processNonPromotion(List<Product> productList, int nonPromotionQuantity) {
         int cost = 0;
         int remainingQuantity = nonPromotionQuantity;
         List<Product> boughtProducts = new ArrayList<>();
@@ -162,7 +162,7 @@ public class Checkout {
             }
         }
 
-        return new BuyResult(cost, 0, cost, boughtProducts, new ArrayList<>(), modifiedProducts);
+        return new OrderResult(cost, 0, cost, boughtProducts, new ArrayList<>(), modifiedProducts);
     }
 
     private int calculateMembershipDiscount(int tempNonPromotionAmount) {
@@ -181,8 +181,8 @@ public class Checkout {
         }
     }
 
-    private List<Product> makeProductList(Buy buy) {
-        List<Product> productList = inventory.getProducts().get(buy.getName());
+    private List<Product> makeProductList(Order order) {
+        List<Product> productList = inventory.getProducts().get(order.getName());
         if (productList == null) {
             throw new IllegalArgumentException("[ERROR] 존재하지 않는 상품입니다. 다시 입력해 주세요.");
         }
