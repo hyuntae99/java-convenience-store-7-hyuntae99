@@ -127,7 +127,7 @@ public class PurchaseService {
             }
             cost += (promotion.getBuy() + promotion.getGet()) * product.getPrice();
             freeQuantity += promotion.getGet();
-            product.reduceQuantity(promotion.getBuy() + promotion.getGet());
+            product.modifyQuantity(promotion.getBuy() + promotion.getGet());
             modifiedProducts.add(
                     new Product(product.getName(), product.getPrice(), promotion.getBuy() + promotion.getGet(),
                             product.getPromotion()));
@@ -162,7 +162,7 @@ public class PurchaseService {
             if (product.getQuantity() > 0) {
                 int availableQuantity = Math.min(remainingQuantity, product.getQuantity());
                 cost += availableQuantity * product.getPrice();
-                product.reduceQuantity(availableQuantity);
+                product.modifyQuantity(availableQuantity);
                 modifiedProducts.add(
                         new Product(product.getName(), product.getPrice(), availableQuantity, product.getPromotion()));
                 addOrUpdateProduct(boughtProducts, product.getName(), product.getPrice(), availableQuantity);
@@ -215,7 +215,7 @@ public class PurchaseService {
     private void addOrUpdateProduct(List<Product> products, String name, int price, int quantity) {
         for (Product product : products) {
             if (product.getName().equals(name)) {
-                product.reduceQuantity(-quantity);
+                product.modifyQuantity(-quantity);
                 return;
             }
         }
@@ -228,7 +228,7 @@ public class PurchaseService {
             for (Product product : productList) {
                 if (product.getPrice() == modifiedProduct.getPrice()
                         && product.getPromotion() == modifiedProduct.getPromotion()) {
-                    product.reduceQuantity(-modifiedProduct.getQuantity());
+                    product.modifyQuantity(-modifiedProduct.getQuantity());
                 }
             }
         }
