@@ -136,15 +136,13 @@ public class Checkout {
     }
 
     private boolean confirmPromotionGet(String productName, int promotionGet) {
-        System.out.printf("현재 %s은(는) %d개를 무료로 더 받을 수 있습니다. 추가하시겠습니까? (Y/N)\n", productName, promotionGet);
-        String input = Console.readLine();
-        return input.equalsIgnoreCase("Y");
+        String message = "현재 " + productName + "은(는) " + promotionGet + "개를 무료로 더 받을 수 있습니다. 추가하시겠습니까? (Y/N)";
+        return questionsValidation(message);
     }
 
     private boolean confirmNonPromotionPurchase(int nonPromotionQuantity, String productName) {
-        System.out.printf("현재 %s %d개는 프로모션 할인이 적용되지 않습니다. 그래도 구매하시겠습니까? (Y/N)\n", productName, nonPromotionQuantity);
-        String input = Console.readLine();
-        return input.equalsIgnoreCase("Y");
+        String message = "현재 " + productName + " " + nonPromotionQuantity + "개는 프로모션 할인이 적용되지 않습니다. 그래도 구매하시겠습니까? (Y/N)";
+        return questionsValidation(message);
     }
 
     private OrderResult processNonPromotion(List<Product> productList, int nonPromotionQuantity) {
@@ -172,9 +170,7 @@ public class Checkout {
     }
 
     private int calculateMembershipDiscount(int tempNonPromotionAmount) {
-        System.out.print("멤버십 할인을 받으시겠습니까? (Y/N)\n");
-        String input = Console.readLine();
-        boolean applyMembershipDiscount = input.equalsIgnoreCase("Y");
+        boolean applyMembershipDiscount = questionsValidation("멤버십 할인을 받으시겠습니까? (Y/N)");
         if (applyMembershipDiscount && tempNonPromotionAmount > 0) {
             return Math.min((int) (tempNonPromotionAmount * 0.3), 8000);
         }
@@ -277,5 +273,19 @@ public class Checkout {
         nonPromotionAmount = 0;
         boughtProducts.clear();
         freeProducts.clear();
+    }
+
+    private boolean questionsValidation(String message) {
+        while (true) {
+            System.out.println(message);
+            String input = Console.readLine();
+            if (input.equalsIgnoreCase("Y")) {
+                return true;
+            } else if (input.equalsIgnoreCase("N")) {
+                return false;
+            } else {
+                System.out.println("[ERROR] 잘못된 입력입니다. 'Y' 또는 'N'을 입력해 주세요.");
+            }
+        }
     }
 }
