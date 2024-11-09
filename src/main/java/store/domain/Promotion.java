@@ -32,7 +32,12 @@ public class Promotion {
 
     public boolean isActive() {
         LocalDate today = LocalDate.from(DateTimes.now());
-        return (today.isEqual(startDate) || today.isAfter(startDate)) && (today.isEqual(endDate) || today.isBefore(
-                endDate));
+        return ((today.isEqual(startDate) || today.isAfter(startDate))) && ((today.isEqual(endDate) || today.isBefore(
+                endDate)));
+    }
+
+    public boolean isActive(LocalDate today) {
+        return ((today.isEqual(startDate) || today.isAfter(startDate))) && ((today.isEqual(endDate) || today.isBefore(
+                endDate)));
     }
 }
