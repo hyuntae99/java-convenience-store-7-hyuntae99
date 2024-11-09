@@ -22,9 +22,11 @@ public class InputView {
 
     public static List<Order> parseOrders(String input) {
         List<Order> orders = new ArrayList<>();
-        String sanitizedInput = sanitizeInput(input);
-        String[] items = sanitizedInput.split(",");
+
+        String[] items = input.split("\\],\\[");
+
         for (String item : items) {
+            item = item.replaceAll("[\\[\\]]", "");
             String[] parts = item.split("-");
             validateItemFormat(parts);
             String name = parts[0].trim();
@@ -34,22 +36,18 @@ public class InputView {
         return orders;
     }
 
-    private static String sanitizeInput(String input) {
-        return input.replace("[", "").replace("]", "");
-    }
-
     protected static void validateInputFormat(String input) {
         if (input == null || input.isEmpty()) {
             throw new IllegalArgumentException("[ERROR] 입력이 비어있습니다. 올바른 형식으로 입력해 주세요.");
         }
-        if (!input.matches("(\\[\\w+-\\d+\\],?)+")) {
+        if (!input.matches("(\\[\\S+-\\d+\\](,\\[\\S+-\\d+\\])*)")) {
             throw new IllegalArgumentException("[ERROR] 입력 형식이 올바르지 않습니다. 형식에 맞게 다시 입력해 주세요.");
         }
     }
 
     static void validateItemFormat(String[] parts) {
         if (parts.length != 2) {
-            throw new IllegalArgumentException("[ERROR] 항목의 형식이 올바르지 않습니다. 상품명과 수량을 '-'로 구분하여 입력해 주세요.");
+            throw new IllegalArgumentException("[ERROR] 각 항목은 '[이름-수량]' 형식이어야 합니다. 다시 입력해 주세요.");
         }
     }
 
