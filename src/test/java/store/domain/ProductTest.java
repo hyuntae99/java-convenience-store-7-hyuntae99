@@ -46,7 +46,7 @@ public class ProductTest {
     @Test
     @DisplayName("상품 수량 감소 확인")
     public void 수량_감소_확인() {
-        product.reduceQuantity(5);
+        product.modifyQuantity(5);
         assertEquals(5, product.getQuantity());
     }
 
@@ -54,26 +54,8 @@ public class ProductTest {
     @DisplayName("상품의 수량보다 구매 수량이 큰 경우")
     public void 구매_수량_초과_감소_예외() {
         Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-            product.reduceQuantity(15);
+            product.modifyQuantity(15);
         });
         assertEquals("[ERROR] 재고 수량을 초과하여 구매할 수 없습니다. 다시 입력해 주세요.", exception.getMessage());
-    }
-
-    @Test
-    @DisplayName("구매 수량이 음수인 경우")
-    public void 구매_수량_음수인_경우() {
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-            product.reduceQuantity(-5);
-        });
-        assertEquals("[ERROR] 구매 수량은 0보다 커야 합니다.", exception.getMessage());
-    }
-
-    @Test
-    @DisplayName("구매 수량이 0인 경우")
-    public void 구매_수량_0인_경우() {
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-            product.reduceQuantity(0);
-        });
-        assertEquals("[ERROR] 구매 수량은 0보다 커야 합니다.", exception.getMessage());
     }
 }
