@@ -29,21 +29,15 @@ public class Checkout {
         List<Product> modifiedProducts = new ArrayList<>();
 
         for (Buy buy : buys) {
-            List<Product> productList = inventory.getProducts().get(buy.getName());
-            if (productList == null) {
-                throw new IllegalArgumentException("[ERROR] 존재하지 않는 상품입니다. 다시 입력해 주세요.");
-            }
+            List<Product> productList = makeProductList(buy);
 
             int buyQuantity = buy.getQuantity();
-            int totalAvailableQuantity = productList.stream().mapToInt(Product::getQuantity).sum();
-            if (buyQuantity > totalAvailableQuantity) {
-                throw new IllegalArgumentException("[ERROR] 재고 수량을 초과하여 구매할 수 없습니다. 다시 입력해 주세요.");
-            }
-
             int remainingQuantity = buyQuantity;
             int freeQuantity = 0;
             int cost = 0;
             int nonPromotionQuantity = 0;
+
+            exceedQuantity(productList, buyQuantity);
 
             // 행사 상품을 우선 소모
             for (Product product : productList) {
@@ -123,12 +117,7 @@ public class Checkout {
             tempTotalAmount += cost;
         }
 
-        System.out.print("멤버십 할인을 받으시겠습니까? (Y/N)\n");
-        String input = Console.readLine();
-        boolean applyMembershipDiscount = input.equalsIgnoreCase("Y");
-        if (applyMembershipDiscount && tempNonPromotionAmount > 0) {
-            membershipDiscount = Math.min((int) (tempNonPromotionAmount * 0.3), 8000);
-        }
+        membershipDiscount = membershipDiscount(tempNonPromotionAmount);
 
         // 반영된 값을 실제 변수로 갱신
         boughtProducts = tempBoughtProducts;
@@ -140,10 +129,35 @@ public class Checkout {
         printAllReceipt();
     }
 
+    private int membershipDiscount(int tempNonPromotionAmount) {
+        System.out.print("멤버십 할인을 받으시겠습니까? (Y/N)\n");
+        String input = Console.readLine();
+        boolean applyMembershipDiscount = input.equalsIgnoreCase("Y");
+        if (applyMembershipDiscount && tempNonPromotionAmount > 0) {
+            membershipDiscount = Math.min((int) (tempNonPromotionAmount * 0.3), 8000);
+        }
+        return tempNonPromotionAmount;
+    }
+
+    private List<Product> makeProductList(Buy buy) {
+        List<Product> productList = inventory.getProducts().get(buy.getName());
+        if (productList == null) {
+            throw new IllegalArgumentException("[ERROR] 존재하지 않는 상품입니다. 다시 입력해 주세요.");
+        }
+        return productList;
+    }
+
+    private void exceedQuantity(List<Product> productList, int buyQuantity) {
+        int totalAvailableQuantity = productList.stream().mapToInt(Product::getQuantity).sum();
+        if (buyQuantity > totalAvailableQuantity) {
+            throw new IllegalArgumentException("[ERROR] 재고 수량을 초과하여 구매할 수 없습니다. 다시 입력해 주세요.");
+        }
+    }
+
     private void addOrUpdateProduct(List<Product> products, String name, int price, int quantity) {
         for (Product product : products) {
             if (product.getName().equals(name)) {
-                product.reduceQuantity(-quantity); // Increase quantity
+                product.reduceQuantity(-quantity);
                 return;
             }
         }
@@ -155,7 +169,7 @@ public class Checkout {
             List<Product> productList = inventory.getProducts().get(modifiedProduct.getName());
             for (Product product : productList) {
                 if (product.getPrice() == modifiedProduct.getPrice() && product.getPromotion() == modifiedProduct.getPromotion()) {
-                    product.reduceQuantity(-modifiedProduct.getQuantity()); // Restore quantity
+                    product.reduceQuantity(-modifiedProduct.getQuantity());
                 }
             }
         }
@@ -167,7 +181,7 @@ public class Checkout {
         reset();
     }
 
-    public int printReceipt1() {
+    private int printReceipt1() {
         int totalQuantity = 0;
         System.out.println("\n==============W 편의점================");
         System.out.println("상품명\t\t수량\t금액");
@@ -186,7 +200,7 @@ public class Checkout {
         return totalQuantity;
     }
 
-    public void printReceipt2(int totalQuantity) {
+    private void printReceipt2(int totalQuantity) {
         System.out.println("====================================");
         System.out.printf("총구매액\t\t%d\t%d\n", totalQuantity, totalAmount);
         System.out.printf("행사할인\t\t\t-%d\n", promotionDiscount);
@@ -194,7 +208,7 @@ public class Checkout {
         System.out.printf("내실돈\t\t\t%d\n", totalAmount - promotionDiscount - membershipDiscount);
     }
 
-    public void reset() {
+    private void reset() {
         totalAmount = 0;
         promotionDiscount = 0;
         membershipDiscount = 0;
