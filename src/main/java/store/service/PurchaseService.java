@@ -1,5 +1,7 @@
 package store.service;
 
+import static store.utils.NumberFormatter.formatWithCommas;
+
 import camp.nextstep.edu.missionutils.Console;
 import java.util.ArrayList;
 import java.util.List;
@@ -245,14 +247,14 @@ public class PurchaseService {
             int freeQuantity = getFreeProductQuantity(product.getName());
             int totalProductQuantity = product.getQuantity() + freeQuantity;
             totalQuantity += totalProductQuantity;
-            System.out.printf("%s\t\t%d\t%d\n", product.getName(), totalProductQuantity,
-                    product.getPrice() * totalProductQuantity);
+            System.out.printf("%s\t\t%s\t%s\n", product.getName(), formatWithCommas(totalProductQuantity),
+                    formatWithCommas(product.getPrice() * totalProductQuantity));
         }
         if (!freeProducts.isEmpty()) {
             System.out.println("=============증\t정===============");
             for (Product product : freeProducts) {
                 if (product.getQuantity() > 0) {
-                    System.out.printf("%s\t\t%d\n", product.getName(), product.getQuantity());
+                    System.out.printf("%s\t\t%s\n", product.getName(), formatWithCommas(product.getQuantity()));
                 }
             }
         }
@@ -270,10 +272,10 @@ public class PurchaseService {
 
     private void printReceipt2(int totalQuantity) {
         System.out.println("====================================");
-        System.out.printf("총구매액\t\t%d\t%d\n", totalQuantity, totalAmount);
-        System.out.printf("행사할인\t\t\t-%d\n", promotionDiscount);
-        System.out.printf("멤버십할인\t\t\t-%d\n", membershipDiscount);
-        System.out.printf("내실돈\t\t\t%d\n", totalAmount - promotionDiscount - membershipDiscount);
+        System.out.printf("총구매액\t\t%s\t%s\n", formatWithCommas(totalQuantity), formatWithCommas(totalAmount));
+        System.out.printf("행사할인\t\t\t-%s\n", formatWithCommas(promotionDiscount));
+        System.out.printf("멤버십할인\t\t\t-%s\n", formatWithCommas(membershipDiscount));
+        System.out.printf("내실돈\t\t\t%s\n", formatWithCommas(totalAmount - promotionDiscount - membershipDiscount));
     }
 
     private void reset() {

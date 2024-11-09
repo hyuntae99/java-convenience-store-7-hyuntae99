@@ -47,8 +47,8 @@ public class OutputViewTest {
         String lineSeparator = System.lineSeparator();
         String expectedOutput = "안녕하세요. W편의점입니다." + lineSeparator +
                 "현재 보유하고 있는 상품입니다." + lineSeparator +
-                "- 콜라 1300원 재고 없음 탄산2+1" + lineSeparator +
-                "- 콜라 1300원 10개 " + lineSeparator;
+                "- 콜라 1,300원 재고 없음 탄산2+1" + lineSeparator +
+                "- 콜라 1,300원 10개 " + lineSeparator;
 
         assertEquals(normalize(expectedOutput), normalize(outContent.toString()));
     }
