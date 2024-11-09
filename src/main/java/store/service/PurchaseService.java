@@ -243,12 +243,12 @@ public class PurchaseService {
     private int printReceipt1() {
         int totalQuantity = 0;
         System.out.println("\n==============W 편의점================");
-        System.out.println("상품명\t\t수량\t금액");
+        System.out.println("상품명 \t\t수량\t금액");
         for (Product product : boughtProducts) {
             int freeQuantity = getFreeProductQuantity(product.getName());
             int totalProductQuantity = product.getQuantity() + freeQuantity;
             totalQuantity += totalProductQuantity;
-            System.out.printf("%s\t\t%s\t%s\n", product.getName(), formatWithCommas(totalProductQuantity),
+            System.out.printf("%s\t\t%s \t%s\n", product.getName(), formatWithCommas(totalProductQuantity),
                     formatWithCommas(product.getPrice() * totalProductQuantity));
         }
         if (!freeProducts.isEmpty()) {
@@ -276,7 +276,7 @@ public class PurchaseService {
         System.out.printf("총구매액\t\t%s\t%s\n", formatWithCommas(totalQuantity), formatWithCommas(totalAmount));
         System.out.printf("행사할인\t\t\t-%s\n", formatWithCommas(promotionDiscount));
         System.out.printf("멤버십할인\t\t\t-%s\n", formatWithCommas(membershipDiscount));
-        System.out.printf("내실돈\t\t\t%s\n", formatWithCommas(totalAmount - promotionDiscount - membershipDiscount));
+        System.out.printf("내실돈\t\t\t %s\n", formatWithCommas(totalAmount - promotionDiscount - membershipDiscount));
     }
 
     private void reset() {
