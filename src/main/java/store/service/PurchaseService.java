@@ -37,7 +37,7 @@ public class PurchaseService {
             OrderResult orderResult = processBuy(productList, buyQuantity);
             if (orderResult == null) {
                 restoreInventory(modifiedProducts);
-                return;
+                throw new IllegalArgumentException("[INFO] 알 수 없는 오류가 발생했습니다.");
             }
 
             tempTotalAmount += orderResult.getCost();
