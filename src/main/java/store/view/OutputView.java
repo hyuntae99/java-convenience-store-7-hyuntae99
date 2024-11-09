@@ -20,10 +20,14 @@ public class OutputView {
     }
 
     public static void printProduct(Product product) {
-        System.out.printf("- %s %d원 %s %s\n",
-                product.getName(),
-                product.getPrice(),
-                product.getQuantity() != 0 ? product.getQuantity() + "개" : "재고 없음",
-                product.getPromotion() != null ? product.getPromotion().getName() : "");
+        String quantity = "재고 없음";
+        if (product.getQuantity() != 0) {
+            quantity = product.getQuantity() + "개";
+        }
+        String promotionName = "";
+        if (product.getPromotion() != null) {
+            promotionName = product.getPromotion().getName();
+        }
+        System.out.printf("- %s %d원 %s %s\n", product.getName(), product.getPrice(), quantity, promotionName);
     }
 }
