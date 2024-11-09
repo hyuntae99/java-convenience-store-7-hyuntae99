@@ -30,6 +30,14 @@ public class Promotion {
         return get;
     }
 
+    public LocalDate getStartDate() {
+        return startDate;
+    }
+
+    public LocalDate getEndDate() {
+        return endDate;
+    }
+
     public boolean isActive() {
         LocalDate today = LocalDate.from(DateTimes.now());
         return ((today.isEqual(startDate) || today.isAfter(startDate))) && ((today.isEqual(endDate) || today.isBefore(
