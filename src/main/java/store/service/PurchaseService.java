@@ -147,7 +147,8 @@ public class PurchaseService {
     }
 
     private boolean confirmNonPromotionPurchase(int nonPromotionQuantity, String productName) {
-        String message = "현재 " + productName + " " + nonPromotionQuantity + "개는 프로모션 할인이 적용되지 않습니다. 그래도 구매하시겠습니까? (Y/N)";
+        String message =
+                "현재 " + productName + " " + nonPromotionQuantity + "개는 프로모션 할인이 적용되지 않습니다. 그래도 구매하시겠습니까? (Y/N)";
         return questionsValidation(message);
     }
 

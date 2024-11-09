@@ -1,22 +1,20 @@
 package store.view;
 
-import java.time.LocalDate;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import store.domain.Product;
 import store.domain.Promotion;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class OutputViewTest {
 
@@ -38,7 +36,8 @@ public class OutputViewTest {
     public void 상품_목록_출력_확인() {
         Map<String, List<Product>> products = new HashMap<>();
         List<Product> beverageList = new ArrayList<>();
-        beverageList.add(new Product("콜라", 1300, 0, new Promotion("탄산2+1", 2, 1, LocalDate.parse("2024-01-01"), LocalDate.parse("2024-12-31"))));
+        beverageList.add(new Product("콜라", 1300, 0,
+                new Promotion("탄산2+1", 2, 1, LocalDate.parse("2024-01-01"), LocalDate.parse("2024-12-31"))));
         beverageList.add(new Product("콜라", 1300, 10, null));
         products.put("콜라", beverageList);
 

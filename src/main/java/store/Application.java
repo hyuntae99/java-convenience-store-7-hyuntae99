@@ -3,8 +3,8 @@ package store;
 import camp.nextstep.edu.missionutils.Console;
 import java.util.List;
 import store.dto.Order;
-import store.service.PurchaseService;
 import store.service.InventoryService;
+import store.service.PurchaseService;
 import store.view.InputView;
 import store.view.OutputView;
 

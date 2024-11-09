@@ -30,6 +30,7 @@ public class OutputView {
         if (product.getPromotion() != null) {
             promotionName = product.getPromotion().getName();
         }
-        System.out.printf("- %s %s원 %s %s\n", product.getName(), formatWithCommas(product.getPrice()), quantity, promotionName);
+        System.out.printf("- %s %s원 %s %s\n", product.getName(), formatWithCommas(product.getPrice()), quantity,
+                promotionName);
     }
 }
