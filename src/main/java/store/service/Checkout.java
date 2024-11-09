@@ -9,7 +9,7 @@ import store.dto.Order;
 import store.dto.OrderResult;
 
 public class Checkout {
-    private Inventory inventory;
+    private InventoryService inventoryService;
     private int totalAmount = 0;
     private int promotionDiscount = 0;
     private int membershipDiscount = 0;
@@ -17,8 +17,8 @@ public class Checkout {
     private List<Product> boughtProducts = new ArrayList<>();
     private List<Product> freeProducts = new ArrayList<>();
 
-    public Checkout(Inventory inventory) {
-        this.inventory = inventory;
+    public Checkout(InventoryService inventoryService) {
+        this.inventoryService = inventoryService;
     }
 
     public void processOrders(List<Order> orders) {
@@ -185,7 +185,7 @@ public class Checkout {
     }
 
     private List<Product> makeProductList(Order order) {
-        List<Product> productList = inventory.getProducts().get(order.getName());
+        List<Product> productList = inventoryService.getProducts().get(order.getName());
         if (productList == null) {
             throw new IllegalArgumentException("[ERROR] 존재하지 않는 상품입니다. 다시 입력해 주세요.");
         }
@@ -211,7 +211,7 @@ public class Checkout {
 
     private void restoreInventory(List<Product> modifiedProducts) {
         for (Product modifiedProduct : modifiedProducts) {
-            List<Product> productList = inventory.getProducts().get(modifiedProduct.getName());
+            List<Product> productList = inventoryService.getProducts().get(modifiedProduct.getName());
             for (Product product : productList) {
                 if (product.getPrice() == modifiedProduct.getPrice()
                         && product.getPromotion() == modifiedProduct.getPromotion()) {

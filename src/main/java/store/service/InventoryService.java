@@ -12,7 +12,7 @@ import java.util.Map;
 import store.domain.Product;
 import store.domain.Promotion;
 
-public class Inventory {
+public class InventoryService {
     private Map<String, List<Product>> products = new LinkedHashMap<>();
     private Map<String, Promotion> promotions = new HashMap<>();
 

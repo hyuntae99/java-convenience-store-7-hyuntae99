@@ -4,21 +4,21 @@ import camp.nextstep.edu.missionutils.Console;
 import java.util.List;
 import store.dto.Order;
 import store.service.Checkout;
-import store.service.Inventory;
+import store.service.InventoryService;
 import store.view.InputView;
 import store.view.OutputView;
 
 public class Application {
     public static void main(String[] args) {
-        Inventory inventory = new Inventory();
-        inventory.loadPromotions("src/main/resources/promotions.md");
-        inventory.loadProducts("src/main/resources/products.md");
+        InventoryService inventoryService = new InventoryService();
+        inventoryService.loadPromotions("src/main/resources/promotions.md");
+        inventoryService.loadProducts("src/main/resources/products.md");
 
-        Checkout checkout = new Checkout(inventory);
+        Checkout checkout = new Checkout(inventoryService);
         boolean continueShopping = true;
 
         while (continueShopping) {
-            OutputView.printProducts(inventory.getProducts());
+            OutputView.printProducts(inventoryService.getProducts());
             processUserInput(checkout);
             continueShopping = isContinueShopping();
         }
