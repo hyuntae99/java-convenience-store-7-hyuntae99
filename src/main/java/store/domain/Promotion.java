@@ -1,7 +1,7 @@
 package store.domain;
 
-import java.time.LocalDate;
 import camp.nextstep.edu.missionutils.DateTimes;
+import java.time.LocalDate;
 
 public class Promotion {
     private String name;
@@ -32,6 +32,7 @@ public class Promotion {
 
     public boolean isActive() {
         LocalDate today = LocalDate.from(DateTimes.now());
-        return (today.isEqual(startDate) || today.isAfter(startDate)) && (today.isEqual(endDate) || today.isBefore(endDate));
+        return (today.isEqual(startDate) || today.isAfter(startDate)) && (today.isEqual(endDate) || today.isBefore(
+                endDate));
     }
 }

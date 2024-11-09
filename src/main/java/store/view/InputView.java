@@ -1,8 +1,8 @@
 package store.view;
 
+import camp.nextstep.edu.missionutils.Console;
 import java.util.ArrayList;
 import java.util.List;
-import camp.nextstep.edu.missionutils.Console;
 import store.dto.Order;
 
 public class InputView {

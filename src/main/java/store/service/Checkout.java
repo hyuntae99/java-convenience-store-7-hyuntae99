@@ -1,12 +1,12 @@
 package store.service;
 
+import camp.nextstep.edu.missionutils.Console;
 import java.util.ArrayList;
 import java.util.List;
-import camp.nextstep.edu.missionutils.Console;
-import store.dto.Order;
-import store.dto.OrderResult;
 import store.domain.Product;
 import store.domain.Promotion;
+import store.dto.Order;
+import store.dto.OrderResult;
 
 public class Checkout {
     private Inventory inventory;
@@ -96,7 +96,8 @@ public class Checkout {
             }
         }
 
-        return new OrderResult(cost, freeQuantity, nonPromotionQuantity, boughtProducts, freeProducts, modifiedProducts);
+        return new OrderResult(cost, freeQuantity, nonPromotionQuantity, boughtProducts, freeProducts,
+                modifiedProducts);
     }
 
     private boolean isPromotionApplicable(Product product) {
@@ -111,7 +112,8 @@ public class Checkout {
         List<Product> boughtProducts = new ArrayList<>();
         List<Product> freeProducts = new ArrayList<>();
 
-        while (remainingQuantity >= promotion.getBuy() && product.getQuantity() >= (promotion.getBuy() + promotion.getGet())) {
+        while (remainingQuantity >= promotion.getBuy() && product.getQuantity() >= (promotion.getBuy()
+                + promotion.getGet())) {
             if (remainingQuantity == promotion.getBuy()) {
                 if (!confirmPromotionGet(product.getName(), promotion.getGet())) {
                     break;
@@ -120,14 +122,17 @@ public class Checkout {
             cost += (promotion.getBuy() + promotion.getGet()) * product.getPrice();
             freeQuantity += promotion.getGet();
             product.reduceQuantity(promotion.getBuy() + promotion.getGet());
-            modifiedProducts.add(new Product(product.getName(), product.getPrice(), promotion.getBuy() + promotion.getGet(), product.getPromotion()));
+            modifiedProducts.add(
+                    new Product(product.getName(), product.getPrice(), promotion.getBuy() + promotion.getGet(),
+                            product.getPromotion()));
             remainingQuantity -= (promotion.getBuy() + promotion.getGet());
             processedQuantity += (promotion.getBuy() + promotion.getGet());
             addOrUpdateProduct(boughtProducts, product.getName(), product.getPrice(), promotion.getBuy());
             addOrUpdateProduct(freeProducts, product.getName(), product.getPrice(), promotion.getGet());
         }
 
-        return new OrderResult(cost, freeQuantity, 0, boughtProducts, freeProducts, modifiedProducts, processedQuantity);
+        return new OrderResult(cost, freeQuantity, 0, boughtProducts, freeProducts, modifiedProducts,
+                processedQuantity);
     }
 
     private boolean confirmPromotionGet(String productName, int promotionGet) {
@@ -153,7 +158,8 @@ public class Checkout {
                 int availableQuantity = Math.min(remainingQuantity, product.getQuantity());
                 cost += availableQuantity * product.getPrice();
                 product.reduceQuantity(availableQuantity);
-                modifiedProducts.add(new Product(product.getName(), product.getPrice(), availableQuantity, product.getPromotion()));
+                modifiedProducts.add(
+                        new Product(product.getName(), product.getPrice(), availableQuantity, product.getPromotion()));
                 addOrUpdateProduct(boughtProducts, product.getName(), product.getPrice(), availableQuantity);
                 remainingQuantity -= availableQuantity;
             }
@@ -177,7 +183,8 @@ public class Checkout {
 
     private void mergeProducts(List<Product> targetProducts, List<Product> sourceProducts) {
         for (Product sourceProduct : sourceProducts) {
-            addOrUpdateProduct(targetProducts, sourceProduct.getName(), sourceProduct.getPrice(), sourceProduct.getQuantity());
+            addOrUpdateProduct(targetProducts, sourceProduct.getName(), sourceProduct.getPrice(),
+                    sourceProduct.getQuantity());
         }
     }
 
@@ -210,7 +217,8 @@ public class Checkout {
         for (Product modifiedProduct : modifiedProducts) {
             List<Product> productList = inventory.getProducts().get(modifiedProduct.getName());
             for (Product product : productList) {
-                if (product.getPrice() == modifiedProduct.getPrice() && product.getPromotion() == modifiedProduct.getPromotion()) {
+                if (product.getPrice() == modifiedProduct.getPrice()
+                        && product.getPromotion() == modifiedProduct.getPromotion()) {
                     product.reduceQuantity(-modifiedProduct.getQuantity());
                 }
             }
@@ -231,7 +239,8 @@ public class Checkout {
             int freeQuantity = getFreeProductQuantity(product.getName());
             int totalProductQuantity = product.getQuantity() + freeQuantity;
             totalQuantity += totalProductQuantity;
-            System.out.printf("%s\t\t%d\t%d\n", product.getName(), totalProductQuantity, product.getPrice() * totalProductQuantity);
+            System.out.printf("%s\t\t%d\t%d\n", product.getName(), totalProductQuantity,
+                    product.getPrice() * totalProductQuantity);
         }
         if (!freeProducts.isEmpty()) {
             System.out.println("=============증\t정===============");

@@ -12,7 +12,8 @@ public class OrderResult {
     private List<Product> modifiedProducts;
     private int processedQuantity;
 
-    public OrderResult(int cost, int freeQuantity, int nonPromotionAmount, List<Product> boughtProducts, List<Product> freeProducts, List<Product> modifiedProducts) {
+    public OrderResult(int cost, int freeQuantity, int nonPromotionAmount, List<Product> boughtProducts,
+                       List<Product> freeProducts, List<Product> modifiedProducts) {
         this.cost = cost;
         this.freeQuantity = freeQuantity;
         this.nonPromotionAmount = nonPromotionAmount;
@@ -22,7 +23,8 @@ public class OrderResult {
         this.processedQuantity = 0;
     }
 
-    public OrderResult(int cost, int freeQuantity, int nonPromotionAmount, List<Product> boughtProducts, List<Product> freeProducts, List<Product> modifiedProducts, int processedQuantity) {
+    public OrderResult(int cost, int freeQuantity, int nonPromotionAmount, List<Product> boughtProducts,
+                       List<Product> freeProducts, List<Product> modifiedProducts, int processedQuantity) {
         this(cost, freeQuantity, nonPromotionAmount, boughtProducts, freeProducts, modifiedProducts);
         this.processedQuantity = processedQuantity;
     }
