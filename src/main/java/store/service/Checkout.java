@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import camp.nextstep.edu.missionutils.Console;
 import store.domain.Buy;
+import store.domain.BuyResult;
 import store.domain.Product;
 import store.domain.Promotion;
 
@@ -30,96 +31,25 @@ public class Checkout {
 
         for (Buy buy : buys) {
             List<Product> productList = makeProductList(buy);
-
             int buyQuantity = buy.getQuantity();
-            int remainingQuantity = buyQuantity;
-            int freeQuantity = 0;
-            int cost = 0;
-            int nonPromotionQuantity = 0;
-
             exceedQuantity(productList, buyQuantity);
 
-            // 행사 상품을 우선 소모
-            for (Product product : productList) {
-                if (product.getPromotion() != null && product.getPromotion().isActive() && product.getQuantity() > 0) {
-                    Promotion promotion = product.getPromotion();
-                    int promotionBuy = promotion.getBuy();
-                    int promotionGet = promotion.getGet();
-
-                    while (remainingQuantity >= promotionBuy) {
-                        if (product.getQuantity() < (promotionBuy + promotionGet)) {
-                            break;
-                        }
-
-                        if (remainingQuantity == promotionBuy) {
-                            System.out.printf("현재 %s은(는) %d개를 무료로 더 받을 수 있습니다. 추가하시겠습니까? (Y/N)\n", product.getName(), promotionGet);
-                            String input = Console.readLine();
-                            if (input.equalsIgnoreCase("Y")) {
-                                cost += (promotionBuy + promotionGet) * product.getPrice();
-                                freeQuantity += promotionGet;
-                                product.reduceQuantity(promotionBuy + promotionGet);
-                                modifiedProducts.add(new Product(product.getName(), product.getPrice(), promotionBuy + promotionGet, product.getPromotion()));
-                                remainingQuantity -= promotionBuy;
-                                addOrUpdateProduct(tempBoughtProducts, product.getName(), product.getPrice(), promotionBuy);
-                                addOrUpdateProduct(tempBoughtProducts, product.getName(), product.getPrice(), promotionGet);
-                                addOrUpdateProduct(tempFreeProducts, product.getName(), product.getPrice(), promotionGet);
-                            } else {
-                                cost += promotionBuy * product.getPrice();
-                                product.reduceQuantity(promotionBuy);
-                                modifiedProducts.add(new Product(product.getName(), product.getPrice(), promotionBuy, product.getPromotion()));
-                                remainingQuantity -= promotionBuy;
-                                addOrUpdateProduct(tempBoughtProducts, product.getName(), product.getPrice(), promotionBuy);
-                            }
-                        } else {
-                            cost += (promotionBuy + promotionGet) * product.getPrice();
-                            freeQuantity += promotionGet;
-                            product.reduceQuantity(promotionBuy + promotionGet);
-                            modifiedProducts.add(new Product(product.getName(), product.getPrice(), promotionBuy + promotionGet, product.getPromotion()));
-                            remainingQuantity -= (promotionBuy + promotionGet);
-                            addOrUpdateProduct(tempBoughtProducts, product.getName(), product.getPrice(), promotionBuy);
-                            addOrUpdateProduct(tempBoughtProducts, product.getName(), product.getPrice(), promotionGet);
-                            addOrUpdateProduct(tempFreeProducts, product.getName(), product.getPrice(), promotionGet);
-                        }
-                    }
-                }
+            BuyResult buyResult = processBuy(productList, buyQuantity);
+            if (buyResult == null) {
+                restoreInventory(modifiedProducts);
+                return;
             }
 
-            // 남은 수량에 대해 한 번에 확인
-            if (remainingQuantity > 0) {
-                nonPromotionQuantity = remainingQuantity;
-                System.out.printf("현재 %s %d개는 프로모션 할인이 적용되지 않습니다. 그래도 구매하시겠습니까? (Y/N)\n", buy.getName(), nonPromotionQuantity);
-                String input = Console.readLine();
-                if (input.equalsIgnoreCase("N")) {
-                    System.out.println("[INFO] 결제가 취소되었습니다. 이전까지의 거래는 반영되지 않습니다.");
-                    restoreInventory(modifiedProducts);
-                    return;
-                } else {
-                    for (Product product : productList) {
-                        if (product.getQuantity() > 0) {
-                            int availableQuantity = Math.min(nonPromotionQuantity, product.getQuantity());
-                            cost += availableQuantity * product.getPrice();
-                            product.reduceQuantity(availableQuantity);
-                            modifiedProducts.add(new Product(product.getName(), product.getPrice(), availableQuantity, product.getPromotion()));
-                            addOrUpdateProduct(tempBoughtProducts, product.getName(), product.getPrice(), availableQuantity);
-                            nonPromotionQuantity -= availableQuantity;
-
-                            // 프로모션이 없는 상품의 금액을 따로 계산
-                            tempNonPromotionAmount += availableQuantity * product.getPrice();
-                        }
-                        if (nonPromotionQuantity == 0) {
-                            break;
-                        }
-                    }
-                }
-            }
-
-            tempPromotionDiscount += freeQuantity * productList.get(0).getPrice();
-            tempTotalAmount += cost;
+            tempTotalAmount += buyResult.getCost();
+            tempPromotionDiscount += buyResult.getFreeQuantity() * productList.get(0).getPrice();
+            tempNonPromotionAmount += buyResult.getNonPromotionAmount();
+            mergeProducts(tempBoughtProducts, buyResult.getBoughtProducts());
+            mergeProducts(tempFreeProducts, buyResult.getFreeProducts());
+            modifiedProducts.addAll(buyResult.getModifiedProducts());
         }
 
-        membershipDiscount = membershipDiscount(tempNonPromotionAmount);
+        membershipDiscount = calculateMembershipDiscount(tempNonPromotionAmount);
 
-        // 반영된 값을 실제 변수로 갱신
         boughtProducts = tempBoughtProducts;
         freeProducts = tempFreeProducts;
         totalAmount = tempTotalAmount;
@@ -129,14 +59,125 @@ public class Checkout {
         printAllReceipt();
     }
 
-    private int membershipDiscount(int tempNonPromotionAmount) {
+    private BuyResult processBuy(List<Product> productList, int buyQuantity) {
+        int remainingQuantity = buyQuantity;
+        int cost = 0;
+        int freeQuantity = 0;
+        int nonPromotionQuantity = 0;
+        List<Product> boughtProducts = new ArrayList<>();
+        List<Product> freeProducts = new ArrayList<>();
+        List<Product> modifiedProducts = new ArrayList<>();
+
+        for (Product product : productList) {
+            if (isPromotionApplicable(product) && remainingQuantity > 0) {
+                Promotion promotion = product.getPromotion();
+                BuyResult promotionResult = processPromotion(product, promotion, remainingQuantity);
+                remainingQuantity -= promotionResult.getProcessedQuantity();
+                cost += promotionResult.getCost();
+                freeQuantity += promotionResult.getFreeQuantity();
+                modifiedProducts.addAll(promotionResult.getModifiedProducts());
+                mergeProducts(boughtProducts, promotionResult.getBoughtProducts());
+                mergeProducts(freeProducts, promotionResult.getFreeProducts());
+            }
+        }
+
+        if (remainingQuantity > 0) {
+            boolean continuePurchase = confirmNonPromotionPurchase(remainingQuantity, productList.get(0).getName());
+            if (!continuePurchase) {
+                System.out.println("[INFO] 결제가 취소되었습니다. 이전까지의 거래는 반영되지 않습니다.");
+                return null;
+            } else {
+                BuyResult nonPromotionResult = processNonPromotion(productList, remainingQuantity);
+                cost += nonPromotionResult.getCost();
+                nonPromotionQuantity += nonPromotionResult.getNonPromotionAmount();
+                mergeProducts(boughtProducts, nonPromotionResult.getBoughtProducts());
+                modifiedProducts.addAll(nonPromotionResult.getModifiedProducts());
+            }
+        }
+
+        return new BuyResult(cost, freeQuantity, nonPromotionQuantity, boughtProducts, freeProducts, modifiedProducts);
+    }
+
+    private boolean isPromotionApplicable(Product product) {
+        return product.getPromotion() != null && product.getPromotion().isActive() && product.getQuantity() > 0;
+    }
+
+    private BuyResult processPromotion(Product product, Promotion promotion, int remainingQuantity) {
+        int processedQuantity = 0;
+        int freeQuantity = 0;
+        int cost = 0;
+        List<Product> modifiedProducts = new ArrayList<>();
+        List<Product> boughtProducts = new ArrayList<>();
+        List<Product> freeProducts = new ArrayList<>();
+
+        while (remainingQuantity >= promotion.getBuy() && product.getQuantity() >= (promotion.getBuy() + promotion.getGet())) {
+            if (remainingQuantity == promotion.getBuy()) {
+                if (!confirmPromotionGet(product.getName(), promotion.getGet())) {
+                    break;
+                }
+            }
+            cost += (promotion.getBuy() + promotion.getGet()) * product.getPrice();
+            freeQuantity += promotion.getGet();
+            product.reduceQuantity(promotion.getBuy() + promotion.getGet());
+            modifiedProducts.add(new Product(product.getName(), product.getPrice(), promotion.getBuy() + promotion.getGet(), product.getPromotion()));
+            remainingQuantity -= (promotion.getBuy() + promotion.getGet());
+            processedQuantity += (promotion.getBuy() + promotion.getGet());
+            addOrUpdateProduct(boughtProducts, product.getName(), product.getPrice(), promotion.getBuy());
+            addOrUpdateProduct(freeProducts, product.getName(), product.getPrice(), promotion.getGet());
+        }
+
+        return new BuyResult(cost, freeQuantity, 0, boughtProducts, freeProducts, modifiedProducts, processedQuantity);
+    }
+
+    private boolean confirmPromotionGet(String productName, int promotionGet) {
+        System.out.printf("현재 %s은(는) %d개를 무료로 더 받을 수 있습니다. 추가하시겠습니까? (Y/N)\n", productName, promotionGet);
+        String input = Console.readLine();
+        return input.equalsIgnoreCase("Y");
+    }
+
+    private boolean confirmNonPromotionPurchase(int nonPromotionQuantity, String productName) {
+        System.out.printf("현재 %s %d개는 프로모션 할인이 적용되지 않습니다. 그래도 구매하시겠습니까? (Y/N)\n", productName, nonPromotionQuantity);
+        String input = Console.readLine();
+        return input.equalsIgnoreCase("Y");
+    }
+
+    private BuyResult processNonPromotion(List<Product> productList, int nonPromotionQuantity) {
+        int cost = 0;
+        int remainingQuantity = nonPromotionQuantity;
+        List<Product> boughtProducts = new ArrayList<>();
+        List<Product> modifiedProducts = new ArrayList<>();
+
+        for (Product product : productList) {
+            if (product.getQuantity() > 0) {
+                int availableQuantity = Math.min(remainingQuantity, product.getQuantity());
+                cost += availableQuantity * product.getPrice();
+                product.reduceQuantity(availableQuantity);
+                modifiedProducts.add(new Product(product.getName(), product.getPrice(), availableQuantity, product.getPromotion()));
+                addOrUpdateProduct(boughtProducts, product.getName(), product.getPrice(), availableQuantity);
+                remainingQuantity -= availableQuantity;
+            }
+            if (remainingQuantity == 0) {
+                break;
+            }
+        }
+
+        return new BuyResult(cost, 0, cost, boughtProducts, new ArrayList<>(), modifiedProducts);
+    }
+
+    private int calculateMembershipDiscount(int tempNonPromotionAmount) {
         System.out.print("멤버십 할인을 받으시겠습니까? (Y/N)\n");
         String input = Console.readLine();
         boolean applyMembershipDiscount = input.equalsIgnoreCase("Y");
         if (applyMembershipDiscount && tempNonPromotionAmount > 0) {
-            membershipDiscount = Math.min((int) (tempNonPromotionAmount * 0.3), 8000);
+            return Math.min((int) (tempNonPromotionAmount * 0.3), 8000);
         }
-        return tempNonPromotionAmount;
+        return 0;
+    }
+
+    private void mergeProducts(List<Product> targetProducts, List<Product> sourceProducts) {
+        for (Product sourceProduct : sourceProducts) {
+            addOrUpdateProduct(targetProducts, sourceProduct.getName(), sourceProduct.getPrice(), sourceProduct.getQuantity());
+        }
     }
 
     private List<Product> makeProductList(Buy buy) {
@@ -186,8 +227,10 @@ public class Checkout {
         System.out.println("\n==============W 편의점================");
         System.out.println("상품명\t\t수량\t금액");
         for (Product product : boughtProducts) {
-            totalQuantity += product.getQuantity();
-            System.out.printf("%s\t\t%d\t%d\n", product.getName(), product.getQuantity(), product.getPrice() * product.getQuantity());
+            int freeQuantity = getFreeProductQuantity(product.getName());
+            int totalProductQuantity = product.getQuantity() + freeQuantity;
+            totalQuantity += totalProductQuantity;
+            System.out.printf("%s\t\t%d\t%d\n", product.getName(), totalProductQuantity, product.getPrice() * totalProductQuantity);
         }
         if (!freeProducts.isEmpty()) {
             System.out.println("=============증\t정===============");
@@ -198,6 +241,15 @@ public class Checkout {
             }
         }
         return totalQuantity;
+    }
+
+    private int getFreeProductQuantity(String productName) {
+        for (Product product : freeProducts) {
+            if (product.getName().equals(productName)) {
+                return product.getQuantity();
+            }
+        }
+        return 0;
     }
 
     private void printReceipt2(int totalQuantity) {
