@@ -67,6 +67,7 @@ public class PurchaseService {
         List<Product> boughtProducts = new ArrayList<>();
         List<Product> freeProducts = new ArrayList<>();
         List<Product> modifiedProducts = new ArrayList<>();
+        int promotionProductCount = countPromotionProducts(productList);
 
         for (Product product : productList) {
             if (isPromotionApplicable(product) && remainingQuantity > 0) {
@@ -82,7 +83,10 @@ public class PurchaseService {
         }
 
         if (remainingQuantity > 0) {
-            boolean continuePurchase = confirmNonPromotionPurchase(remainingQuantity, productList.get(0).getName());
+            boolean continuePurchase = true;
+            if (promotionProductCount != 0) {
+                continuePurchase = confirmNonPromotionPurchase(remainingQuantity, productList.get(0).getName());
+            }
             if (!continuePurchase) {
                 System.out.println("[INFO] 결제가 취소되었습니다. 이전까지의 거래는 반영되지 않습니다.");
                 restoreInventory(modifiedProducts);
@@ -197,6 +201,12 @@ public class PurchaseService {
         if (buyQuantity > totalAvailableQuantity) {
             throw new IllegalArgumentException("[ERROR] 재고 수량을 초과하여 구매할 수 없습니다. 다시 입력해 주세요.");
         }
+    }
+
+    private int countPromotionProducts(List<Product> productList) {
+        return (int) productList.stream()
+                .filter(product -> product.getPromotion() != null && product.getPromotion().isActive())
+                .count();
     }
 
     private void addOrUpdateProduct(List<Product> products, String name, int price, int quantity) {
