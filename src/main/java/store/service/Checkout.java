@@ -85,6 +85,7 @@ public class Checkout {
             boolean continuePurchase = confirmNonPromotionPurchase(remainingQuantity, productList.get(0).getName());
             if (!continuePurchase) {
                 System.out.println("[INFO] 결제가 취소되었습니다. 이전까지의 거래는 반영되지 않습니다.");
+                restoreInventory(modifiedProducts);
                 return null;
             } else {
                 BuyResult nonPromotionResult = processNonPromotion(productList, remainingQuantity);
