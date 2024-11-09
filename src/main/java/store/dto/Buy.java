@@ -1,4 +1,4 @@
-package store.domain;
+package store.dto;
 
 public class Buy {
     private final String name;

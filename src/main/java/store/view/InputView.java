@@ -3,7 +3,7 @@ package store.view;
 import java.util.ArrayList;
 import java.util.List;
 import camp.nextstep.edu.missionutils.Console;
-import store.domain.Buy;
+import store.dto.Buy;
 
 public class InputView {
 

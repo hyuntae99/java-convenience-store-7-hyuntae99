@@ -1,4 +1,4 @@
-package store.domain;
+package store.dto;
 
 import java.util.List;
 import store.domain.Product;

@@ -3,8 +3,8 @@ package store.service;
 import java.util.ArrayList;
 import java.util.List;
 import camp.nextstep.edu.missionutils.Console;
-import store.domain.Buy;
-import store.domain.BuyResult;
+import store.dto.Buy;
+import store.dto.BuyResult;
 import store.domain.Product;
 import store.domain.Promotion;
 

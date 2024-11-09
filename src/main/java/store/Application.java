@@ -2,7 +2,7 @@ package store;
 
 import camp.nextstep.edu.missionutils.Console;
 import java.util.List;
-import store.domain.Buy;
+import store.dto.Buy;
 import store.service.Checkout;
 import store.service.Inventory;
 import store.view.InputView;
