@@ -8,7 +8,7 @@ import store.domain.Promotion;
 import store.dto.Order;
 import store.dto.OrderResult;
 
-public class Checkout {
+public class PurchaseService {
     private InventoryService inventoryService;
     private int totalAmount = 0;
     private int promotionDiscount = 0;
@@ -17,7 +17,7 @@ public class Checkout {
     private List<Product> boughtProducts = new ArrayList<>();
     private List<Product> freeProducts = new ArrayList<>();
 
-    public Checkout(InventoryService inventoryService) {
+    public PurchaseService(InventoryService inventoryService) {
         this.inventoryService = inventoryService;
     }
 
