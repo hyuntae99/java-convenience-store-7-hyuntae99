@@ -243,7 +243,7 @@ public class PurchaseService {
     private int printReceipt1() {
         int totalQuantity = 0;
         System.out.println("\n==============W 편의점================");
-        System.out.println("상품명 \t\t수량\t금액");
+        System.out.println("상품명  \t\t수량\t금액");
         for (Product product : boughtProducts) {
             int freeQuantity = getFreeProductQuantity(product.getName());
             int totalProductQuantity = product.getQuantity() + freeQuantity;
